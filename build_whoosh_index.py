@@ -3,12 +3,13 @@ from whoosh import index
 from whoosh.fields import Schema, TEXT, ID
 from file_parser import parse_file
 from tqdm import tqdm
-from tokenizer import JiebaTokenizer      # 用你自己写好的分词器
+from tokenizer import JiebaTokenizer
 
 schema = Schema(
     path=ID(stored=True, unique=True),
     filename=TEXT(stored=True),
-    content=TEXT(analyzer=JiebaTokenizer(), stored=True)
+    content=TEXT(analyzer=JiebaTokenizer(), stored=True),
+    summary=TEXT(stored=True)   # 必须添加这个字段
 )
 
 if not os.path.exists("indexdir"):
@@ -29,7 +30,8 @@ for file_path in tqdm(all_files):
     writer.add_document(
         path=file_path,
         filename=os.path.basename(file_path),
-        content=text
+        content=text,
+        summary=text[:300]  # 写入前300字作为摘要
     )
 writer.commit()
-print("Whoosh index built.")
+print("Whoosh index built with summary field.")
